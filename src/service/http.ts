@@ -23,7 +23,6 @@ const instance = axios.create({
 // 添加请求拦截器
 instance.interceptors.request.use(
   function (config) {
-    console.log(config.headers['Content-Type'],'x==')
     if(config.method === 'post') {
         config.data = qs.stringify(config.data);
         config.headers['Content-Type'] = 'application/x-www-form-urlencoded';
@@ -42,13 +41,19 @@ instance.interceptors.request.use(
     return Promise.reject(error);
   }
 );
+let isMessageShowing = false;
 
 // 添加响应拦截器
 instance.interceptors.response.use(
   function (response:AxiosResponse<ApiResponse>) {
     // 对响应数据做点什么
     if (response.data.code === 996 || response.data.code === 1) {
-      routes.navigate('/login')
+        if (!isMessageShowing) {
+            isMessageShowing = true;
+            message.error(response.data.msg);
+            setTimeout(() => isMessageShowing = false, 3000);  
+            routes.navigate('/login')
+        }
     }
     // if(response.data.code === 0 && !response.data.data ) {
     //     message.error(response.data.msg)
