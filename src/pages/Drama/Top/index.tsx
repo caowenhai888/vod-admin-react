@@ -38,6 +38,8 @@ const TagsTable = () => {
     const [dramaList, setDramaList]= useState<any>([])
     const [form] = Form.useForm();
     const { tableProps, refresh } = useAntdTable(getTableData )
+    const [selectedDramaIds, setSelectedDramaIds] = useState<any>([]);
+
     const {} = useRequest(api, {
         onSuccess(res) {
             if(res.data.code === 0){
@@ -137,6 +139,7 @@ const TagsTable = () => {
     };
       
     const handleModalSubmit = async() => {
+
         try {
             
         
@@ -158,13 +161,26 @@ const TagsTable = () => {
             form.resetFields();
             setModalVisible(false);
             setSelectedTag(null);
+           
             refresh();
+            setSelectedDramaIds([])
             message.success('操作成功');
         }
         
         } catch (error) {
             console.log(error, 'error-')
         }
+    };
+    const updateSelectedDramas = (dramaId, operation) => {
+        let updatedDramas = [...selectedDramaIds];
+        
+        if (operation === 'add') {
+            updatedDramas.push(dramaId);
+        } else if (operation === 'remove') {
+            updatedDramas = updatedDramas.filter(id => id !== dramaId);
+        }
+        
+        setSelectedDramaIds(updatedDramas);
     };
 
     return (
@@ -177,7 +193,7 @@ const TagsTable = () => {
                     setSelectedTag(null);
                     setModalVisible(true)
                 }}>
-                新增标签
+                新增
             </Button>
         }>
             <Table 
@@ -191,8 +207,13 @@ const TagsTable = () => {
                 title={selectedTag ? '编辑' : '新增'}
                 open={modalVisible}
                 width={'40%'}
+                destroyOnClose ={ true}
                 onOk={handleModalSubmit}
-                onCancel={() => setModalVisible(false)}
+                onCancel={() => {
+                    setSelectedTag(null)
+                    form.resetFields();
+                    setSelectedDramaIds([]); setModalVisible(false)
+                }}
             >
                 <div className='form-box'>
                 <Form labelCol={{ span: 5 }} form={form} onFinish={handleFinish} autoComplete="off">
@@ -219,8 +240,20 @@ const TagsTable = () => {
                                                 rules={[{ required: true }]}
                                                 name={[field.name, 'dramaId']} 
                                             >
-                                                <Select style={{width:"45%", marginRight:"10px"}} placeholder="选择剧集" >
-                                                {dramaList.map(drama => <Option key={drama.dramaId} value={drama.dramaId}>{drama.dramaName}</Option>)}
+                                                <Select 
+                                                      onChange={(selectedId) => {
+                                                        updateSelectedDramas(selectedId, 'add');
+                                                      }}
+                                                      onDeselect={(deselectedId) => {
+                                                        updateSelectedDramas(deselectedId, 'remove');
+                                                      }}
+                                                    style={{width:"45%", marginRight:"10px"}} 
+                                                    placeholder="选择剧集" >
+                                                    {dramaList.map(drama => <Option 
+                                                        disabled={selectedDramaIds.includes(drama.dramaId)}
+                                              
+                                                        key={drama.dramaId} 
+                                                        value={drama.dramaId}>{drama.dramaName}</Option>)}
                                                 </Select>
                                             </Form.Item>
 

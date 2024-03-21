@@ -2,14 +2,14 @@ import React, { useState } from "react";
 import { Upload, Button, message } from "antd";
 import { UploadOutlined } from '@ant-design/icons';
 import { http } from 'src/service'
-import type { UploadProps } from 'antd';
+import type { UploadProps, FormInstance } from 'antd';
 
 interface Props {
     options: any
-    refresh: () => void
+    form: FormInstance
 }
 
-const MyUploadComponent: React.FC<Props> = ({ options, refresh }) => {
+const MyUploadComponent: React.FC<Props> = ({ options, form }) => {
 
     const [fileList, setFileList] = useState<any>([]);
  
@@ -20,10 +20,10 @@ const MyUploadComponent: React.FC<Props> = ({ options, refresh }) => {
             userId: "1021906854894423",
             onUploadstarted(uploadInfo) {
 
-                http.post('/series/createUploadVoideo', { title: fileName, fileName: fileName }).then(res => {
+                http.post('/series/createUploadImage', { title: fileName, fileName: fileName }).then(res => {
                     if (res.data.code === 0) {
                         const credentials = res.data.videoId;
-                        uploader.setUploadAuthAndAddress(uploadInfo, res.data.uploadAuth, res.data.uploadAddress, res.data.videoId);
+                        uploader.setUploadAuthAndAddress(uploadInfo, res.data.uploadAuth, res.data.uploadAddress, res.data.imageId);
                         setFileList(prevFileList => prevFileList.map(prevFile => prevFile.uid === file.uid ? { ...prevFile, status: 'uploading' } : prevFile));
                     }
                 })
@@ -45,11 +45,12 @@ const MyUploadComponent: React.FC<Props> = ({ options, refresh }) => {
                         timer = setTimeout(() => {
                             message.success('上传完成')
                             setFileList([])
-                            refresh()
+                            // refresh()
                         }, 500);
                     }
                     return updatedFileList 
                 });
+                form.setFieldValue('cover_url', uploadInfo.videoId)
 
             },
             onUploadFailed(uploadInfo, code, mess) {
@@ -68,10 +69,10 @@ const MyUploadComponent: React.FC<Props> = ({ options, refresh }) => {
 
     const handleBeforeUpload = (file: any, fileList: File[]): boolean => {
         const isVideo = file.type.startsWith('video/');
-        if (!isVideo) {
-            message.error('您只能上传视频文件!');
-            return false
-        }
+        // if (!isVideo) {
+        //     message.error('您只能上传视频文件!');
+        //     return false
+        // }
         setFileList(prevFileList => [...prevFileList, { uid: file.uid, name: file.name, status: 'uploading', percent: 0 }]);
         let newKey = new Date().getTime();
         upFn(file.name, file, newKey);
@@ -89,7 +90,7 @@ const MyUploadComponent: React.FC<Props> = ({ options, refresh }) => {
 
     return (
         <Upload  {...props}>
-        <Button icon={<UploadOutlined />}>Click to upload</Button>
+        <Button icon={<UploadOutlined />}>点击上传</Button>
         </Upload>
         
     )

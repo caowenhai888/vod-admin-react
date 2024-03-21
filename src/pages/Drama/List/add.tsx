@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Form, Input, InputNumber, Button, message, Select } from 'antd';
+import { Modal, Form, Input, InputNumber, Row,Col, message, Select } from 'antd';
 import { http } from 'src/service'
 import { isEmpty } from 'lodash';
 import UploadImg from './UploadImg'
@@ -15,6 +15,7 @@ interface Props{
 const DramaForm:React.FC<Props> = ({ visible, onCancel, dramaId, resetList }) => {
   const [form] = Form.useForm();
   const [tags, setTags] = useState([]);
+  const [ record, setRecord] = useState<any>({})
 
   // 加载并设置标签
   useEffect(() => {
@@ -35,6 +36,7 @@ const DramaForm:React.FC<Props> = ({ visible, onCancel, dramaId, resetList }) =>
         .then(res => {
           if(res.data.code === 0) {
             const drama = res.data.data;
+            setRecord(drama)
             const { tags } = drama
             form.setFieldsValue({...drama, tags: isEmpty(tags) ? []:tags.map(item=> item.tag_id)});
           }
@@ -88,9 +90,22 @@ const DramaForm:React.FC<Props> = ({ visible, onCancel, dramaId, resetList }) =>
         <Form.Item name="name" label="剧集名称" rules={[{ required: true, message: '请输入名称!' }]}>
           <Input />
         </Form.Item>
-        <Form.Item name="cover_url" label="封面地址" rules={[{ required: true, message: '请输入封面地址!' }]}>
-            {/* <UploadImg /> */}
+     
+        <Form.Item shouldUpdate={(prevValues, curValues) => prevValues.cover_url !== curValues.cover_url}>
+            <Row gutter={5}>
+                <Col span={12}>
+                    <Form.Item name="cover_url" shouldUpdate label="封面地址" >
+                        <Input />
+                    </Form.Item>
+                </Col>
+                <Col span={12}>
+                    <Form.Item>
+                        <UploadImg options={record} form={form} />
+                    </Form.Item>
+                </Col>
+            </Row>
         </Form.Item>
+
         <Form.Item name="all_count" label="总剧集数" rules={[{ required: true, message: '请输入总剧集数!' }]}>
           <InputNumber width={"100%"} />
         </Form.Item>
