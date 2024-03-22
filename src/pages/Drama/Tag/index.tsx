@@ -22,8 +22,7 @@ const TagsTable = () => {
     const [loading, setLoading] = useState(false);
     const [form] = Form.useForm();
     const { tableProps, refresh } = useAntdTable(getTableData )
-    console.log(tableProps, 'tableProps---')
-
+  
     // defaultValue 设置默认值
     const columns = [
         {

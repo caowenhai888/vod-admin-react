@@ -1,10 +1,12 @@
 import  { useEffect, useState } from 'react';
-import { Space,Table, Button, Modal, Form, Input,InputNumber, message,Card,Select,Popconfirm } from 'antd';
-import { PlusOutlined, MinusCircleOutlined } from '@ant-design/icons';
+import axios from 'axios'
+import { Space,Table, Button, Modal, Form, Input,InputNumber, message,Card,Select,Popconfirm, Tooltip } from 'antd';
+import { PlusOutlined, MinusCircleOutlined, EyeOutlined } from '@ant-design/icons';
 import { useAntdTable,useRequest } from 'ahooks'
 import { http } from 'src/service';
 import { baseUrl } from 'src/service/http';
-import axios from 'axios'
+
+import { DragSortTable } from '@ant-design/pro-components';
 
 const instance = axios.create({
     baseURL: baseUrl,
@@ -19,7 +21,7 @@ const { Option } =Select
 
 
 const getTableData = ({ current, pageSize }): Promise<any> => {
-    return http.get(`/rank/getRankList?`)
+    return http.get(`/rank/getRankList`)
       .then((res) => ({
         list: res.data.data,
     }));
@@ -37,7 +39,11 @@ const TagsTable = () => {
     const [loading, setLoading] = useState(false);
     const [dramaList, setDramaList]= useState<any>([])
     const [form] = Form.useForm();
-    const { tableProps, refresh } = useAntdTable(getTableData )
+    const { tableProps, refresh } = useAntdTable(getTableData ,{ onSuccess(data, params) {
+        setDataSource(data.list)
+       
+    },})
+    const [dataSource, setDataSource] = useState<any>([]);
     const [selectedDramaIds, setSelectedDramaIds] = useState<any>([]);
 
     const {} = useRequest(api, {
@@ -51,6 +57,12 @@ const TagsTable = () => {
    
     const columns = [
         {
+            title: '排序',
+            dataIndex: 'sort',
+            width: 60,
+            className: 'drag-visible',
+        },
+        {
             title: 'ID',
             dataIndex: 'rankId',
             width: 80,
@@ -62,11 +74,13 @@ const TagsTable = () => {
         {
             title: '剧集列表',
             dataIndex: 'dramas',
+            with:400,
             render: (text, record) => {
                 return (
-                    <div style={{ maxHeight:"80px", overflowY:"scroll"}}>
-                        {record?.drama?.map(item => <p key={item.dramaId}>剧集名称：{item.dramaName}-剧集积分:{item.dramaScore}</p>)}
-                    </div>
+                <Tooltip overlayStyle={{maxWidth:700}}  title={ record?.drama?.map(item => <p key={item.dramaId}>剧集名称：{item.dramaName}-剧集积分:{item.dramaScore}</p>) } trigger="hover" >
+                     <Button size="small" type="primary"  icon={ <EyeOutlined />}>查看</Button>
+                </Tooltip>
+                   
                 )
             }
         },
@@ -182,6 +196,21 @@ const TagsTable = () => {
         
         setSelectedDramaIds(updatedDramas);
     };
+    const handleDragSortEnd = (
+        beforeIndex: number,
+        afterIndex: number,
+        newDataSource: any,
+      ) => {
+        setDataSource(newDataSource);
+        http.post('/rank/sort',{ranks:newDataSource.map((item,index) => item.rankId).join()}).then(res =>{
+            if(res.data.code === 0){
+                message.success('修改列表排序成功');
+                refresh()
+            }
+        })
+       
+    };
+    
 
     return (
         <Card title={
@@ -196,11 +225,17 @@ const TagsTable = () => {
                 新增
             </Button>
         }>
-            <Table 
-                bordered 
+            <DragSortTable 
+                bordered
+                search={false}
+                toolBarRender={false}
+                onDragSortEnd={handleDragSortEnd}
                 columns={columns} 
                 {...tableProps}
-                rowKey="tag_id" 
+                dataSource={dataSource.map((item,index) => ({...item, sort:index}))}
+                pagination = {{...tableProps.pagination,  showTotal: false, showSizeChanger:true, pageSize:15}}
+                rowKey="rankId" 
+                dragSortKey="sort"
             />
        
             <Modal

@@ -6,6 +6,7 @@ import {
 import React, { useState } from 'react';
 import Slider from 'src/pages/Slider'
 import { http } from 'src/service'
+
 const { SubMenu } = Menu;
 const { Header, Content, Sider } = Layout;
 
@@ -78,7 +79,7 @@ const MyComponent = () => {
                     style={{
                         padding: 14,
                         margin: '64px 16px 0', // Margin top equals Header height
-                        minHeight: 280,
+                        minHeight: 'calc(100vh - 64px)',
                         overflow: 'initial',
                     }}
                 >

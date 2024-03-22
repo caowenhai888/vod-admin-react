@@ -1,8 +1,9 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { Upload, Button, Progress, message } from "antd";
 import { InboxOutlined } from '@ant-design/icons';
 import { http } from 'src/service'
 import type { UploadProps } from 'antd';
+import { useDebounceEffect } from 'ahooks'
 
 interface Props {
     options: any
@@ -12,25 +13,19 @@ interface Props {
 const MyUploadComponent: React.FC<Props> = ({ options, refresh }) => {
 
     const [fileList, setFileList] = useState<any>([]);
-    const voideoUploadSuccess = useCallback((option) => {
+    const AliyunUpload = useRef<any>(null)
 
-        http.post('/series/voideoUploadSuccess', { ...option }).then(res => {
-            if (res.data.code === 0) {
-            }
-        })
-    }, [fileList])
-    let timer: any = null
-    const upFn = (fileName, file, key) => {
-        var userData = '{"Vod":{}}'
-        var uploader = new (window as any).AliyunUpload.Vod({
+    useEffect(() => {
+        if(!options.id) return 
+        const payload = {
             userId: "1021906854894423",
             onUploadstarted(uploadInfo) {
-
+                console.log(uploadInfo)
+                const fileName = uploadInfo.file.name 
                 http.post('/series/createUploadVoideo', { title: fileName, fileName: fileName }).then(res => {
                     if (res.data.code === 0) {
-                        const credentials = res.data.videoId;
-                        uploader.setUploadAuthAndAddress(uploadInfo, res.data.uploadAuth, res.data.uploadAddress, res.data.videoId);
-                        setFileList(prevFileList => prevFileList.map(prevFile => prevFile.uid === file.uid ? { ...prevFile, status: 'uploading' } : prevFile));
+                        AliyunUpload.current.setUploadAuthAndAddress(uploadInfo, res.data.uploadAuth, res.data.uploadAddress, res.data.videoId);
+                        setFileList(prevFileList => prevFileList.map(prevFile => prevFile.uid === uploadInfo.file.uid ? { ...prevFile, status: 'uploading' } : prevFile));
                     }
                 })
             },
@@ -42,18 +37,7 @@ const MyUploadComponent: React.FC<Props> = ({ options, refresh }) => {
                     fileName: uploadInfo.file.name
                 }
                 setFileList(prevFileList => {
-                    const updatedFileList = prevFileList.map(prevFile => prevFile.uid === file.uid ? { ...prevFile, status: 'done' } : prevFile);
-                    const areAllFilesUploaded = updatedFileList.every(file => file.status === 'done');
-                    if (areAllFilesUploaded) {
-                        if (timer) {
-                            clearTimeout(timer);
-                        }
-                        timer = setTimeout(() => {
-                            message.success('上传完成')
-                            setFileList([])
-                            refresh()
-                        }, 500);
-                    }
+                    const updatedFileList = prevFileList.map(prevFile => prevFile.uid === uploadInfo.file.uid ? { ...prevFile, status: 'done' } : prevFile);
                     return updatedFileList 
                 });
                 voideoUploadSuccess(option)
@@ -61,17 +45,33 @@ const MyUploadComponent: React.FC<Props> = ({ options, refresh }) => {
             },
             onUploadFailed(uploadInfo, code, mess) {
                 message.error(mess);
-                setFileList(prevFileList => prevFileList.map(prevFile => prevFile.uid === file.uid ? { ...prevFile, status: 'error' } : prevFile));
+                setFileList(prevFileList => prevFileList.map(prevFile => prevFile.uid === uploadInfo.file.uid ? { ...prevFile, status: 'error' } : prevFile));
 
             },
-            onUploadProgress(uploadInfo) {
-                const progress = Math.round(uploadInfo.size * 100 / file.size);
-                setFileList(prevFileList => prevFileList.map(prevFile => prevFile.uid === file.uid ? { ...prevFile, percent: progress } : prevFile));
+            onUploadProgress(uploadInfo,totalSize, loadPercent) {
+                var percent = Math.floor(loadPercent * 100);
+                setFileList(prevFileList => prevFileList.map(prevFile => prevFile.uid === uploadInfo.file.uid ? { ...prevFile, percent: percent } : prevFile));
+            },
+            onUploadEnd: function (uploadInfo) {
+                setFileList([])
+                refresh()
+               message.success('上传完成')
+             }
+        }
+        if(AliyunUpload.current) return
+        AliyunUpload.current = new (window as any).AliyunUpload.Vod(payload)
+    }, [options.id])
+
+
+    const voideoUploadSuccess = useCallback((option) => {
+
+        http.post('/series/voideoUploadSuccess', { ...option }).then(res => {
+            if (res.data.code === 0) {
             }
         })
-        uploader.addFile(file, null, null, null, userData);
-        uploader.startUpload();
-    }
+    }, [fileList])
+    let timer: any = null
+
 
     const handleBeforeUpload = (file: any, fileList: File[]): boolean => {
         const isVideo = file.type.startsWith('video/');
@@ -79,12 +79,11 @@ const MyUploadComponent: React.FC<Props> = ({ options, refresh }) => {
             message.error('您只能上传视频文件!');
             return false
         }
-        setFileList(prevFileList => [...prevFileList, { uid: file.uid, name: file.name, status: 'uploading', percent: 0 }]);
-        let newKey = new Date().getTime();
-        upFn(file.name, file, newKey);
+        setFileList(prevFileList => [...prevFileList, { uid:file.uid, name: file.name, percent: 0 }]);
+        AliyunUpload.current.addFile(file, null, null, null, '{"Vod":{}}');
         return false
     }
-
+  
     const props: UploadProps = {
         accept: 'video/*',
         fileList,
@@ -93,15 +92,24 @@ const MyUploadComponent: React.FC<Props> = ({ options, refresh }) => {
         action: '/upload/demo',
         beforeUpload: handleBeforeUpload
     }
-
+    const startUp = (e) => {
+         e.stopPropagation()
+         AliyunUpload.current.startUpload()
+    }
     return (
-        <Upload.Dragger  {...props}>
-            <p className="ant-upload-drag-icon">
-                <InboxOutlined />
-            </p>
-            <p className="ant-upload-text">点击上传，或将文件拖拽到此处</p>
+        <Fragment>
+           <Upload.Dragger  {...props}>
+                <p className="ant-upload-drag-icon">
+                    <InboxOutlined />
+                </p>
+                {fileList.length !==0 && <Button danger onClick={ (e) => startUp(e) } type="primary">点击开始上传</Button> }
+              
+                <p className="ant-upload-text">点击或将文件拖拽到此处</p>
 
-        </Upload.Dragger>
+            </Upload.Dragger>
+            
+        </Fragment>
+    
     )
 }
 
