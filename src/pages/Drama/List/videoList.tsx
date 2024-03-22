@@ -95,11 +95,6 @@ const UploadCom: Ract.FC<Props> = ({ visible, onCancel, resetList,record }) => {
     }
  
     const columns: ProColumns<any>[] = [
-        {
-            title: '排序',
-            dataIndex: 'idx',
-            width: 80,
-        },
         { title: '名称', dataIndex: 'name', width: 120, ellipsis:true, tooltip:true },
         { title: '视频id', dataIndex: 'video_id', width: 120, readonly:true, copyable: true, ellipsis: true },
         { title: '价格', valueType:"money", dataIndex: 'price', width: 80, },
@@ -210,14 +205,13 @@ const UploadCom: Ract.FC<Props> = ({ visible, onCancel, resetList,record }) => {
                     type: 'multiple',
                     editableKeys,
                     onSave: async (rowKey, data, row) => {
-                      console.log(rowKey, data, row);
                       const obj:any = {}
                       obj.free =  data.free === 'true';
                       obj.vaild =  data.vaild === 'true';
                       obj.shared =  data.shared === 'true';
                       obj.dramaId = data.drama_id;
                       obj.videoId = data.video_id;
-                      obj.idx = data.idx;
+                    //   obj.idx = data.idx;
                       obj.size = data.size;
                       obj.fileName = data.name;
                       obj.price= data.price
