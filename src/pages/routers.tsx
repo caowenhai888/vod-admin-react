@@ -10,6 +10,8 @@ import NoPermissionPage from 'src/pages/403'
 import Video from 'src/pages/Drama/List/DramaList'
 import Tag from 'src/pages/Drama/Tag'
 import Login from 'src/pages/Login'
+import Menu from 'src/pages/admin/Menu'
+import Rolelist from 'src/pages/admin/Rolelist'
 // import Home from 'src/pages/Home'
 
 const routerConfig:RouteObject[] = [
@@ -39,7 +41,16 @@ const routerConfig:RouteObject[] = [
             {
                 path: '/top/list',
                 element: <Top />,
+            },
+            {
+                path:"/sys/showMenulist",
+                element: <Menu />
+            },
+            {
+                path:"/sys/showRolelist",
+                element: <Rolelist />
             }
+
             
         ]
     },

@@ -41,7 +41,7 @@ const Login = () => {
             </div>
             <div className='m-login-box'>
                 <Fragment>
-                    <h3 className='tc'>欢迎登录短剧管理系统</h3>
+                    <h3 className='tc'>欢迎登录VOD管理系统</h3>
                     <p>账号密码登录</p>
                     <div className='m-login-wrap'>
                     <Form
