@@ -77,7 +77,7 @@ const MyComponent = () => {
                 <Content
                     className="site-layout-background"
                     style={{
-                        padding: 14,
+                        padding: '14px 0',
                         margin: '64px 16px 0', // Margin top equals Header height
                         minHeight: 'calc(100vh - 64px)',
                         overflow: 'initial',

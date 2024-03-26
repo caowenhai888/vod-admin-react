@@ -271,7 +271,7 @@ const App: React.FC = () => {
 															<Button  onClick={(event) =>{ event.stopPropagation() }}size="small" type="primary" danger>删除</Button>
 														</Popconfirm>
                                                         
-                                                        <span onClick={ (event) => event.stopPropagation()}> <Switch value={ !!item.hide } onChange={() => handleChange(item.id, item.hide)} /></span>
+                                                        <span onClick={ (event) => event.stopPropagation()}> <Switch value={ !item.hide } onChange={() => handleChange(item.id, item.hide)} /></span>
                                                        
 														
 													</Space>
