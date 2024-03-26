@@ -20,6 +20,9 @@ const ServerMenu = ({}) => {
                 setMenuData(res.data.data)
             }
            
+        },
+        onError(error: Error){
+            console.log(error, 'error')
         }
     })
 

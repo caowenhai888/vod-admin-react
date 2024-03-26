@@ -10,6 +10,15 @@ type ApiResponse = {
     msg: string;
     count: number;
 };
+
+
+const isApiTimeout = (error): boolean => {
+	return error.code === 'ECONNABORTED' && error.message.indexOf('timeout') !== -1;
+};
+
+const isNetworkError = (error): boolean => {
+	return error.message === 'Network Error';
+};
 // 创建axios实例
 const instance = axios.create({
   baseURL: baseUrl,
@@ -62,6 +71,12 @@ instance.interceptors.response.use(
     return response;
   },
   function (error) {
+    if(isApiTimeout(error)){
+        message.error('接口请求超时')
+    }
+    if (isNetworkError(error)) {
+        message.error('网络异常');
+    }
     // 对响应错误做点什么
     return Promise.reject(error);
   }

@@ -1,16 +1,18 @@
 import React, { Fragment, useEffect, useState } from 'react';
-import { UserOutlined } from '@ant-design/icons';
+import { UserOutlined, PlusOutlined } from '@ant-design/icons';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { Popconfirm, message, Divider, List, Skeleton, Card, Row, Col, Button, Space, Tag, Form, Input, Select } from 'antd';
+import { Popconfirm, message, Divider, List, Skeleton, Card, Row, Col, Button, Space, Tag, Form, Input, Select, Switch, Modal } from 'antd';
 import { http } from 'src/service'
 import dayjs from 'dayjs'
-import { useAsyncEffect } from 'ahooks'
+import { useAsyncEffect, useRequest } from 'ahooks'
 import { useImmer } from 'use-immer'
 import { isEmpty } from 'lodash'
 import DramaForm from './add'
 import VideoList from './videoList'
 
 const { Option } = Select;
+
+
 interface DataType {
 	id: string;
 	name: string;
@@ -31,6 +33,18 @@ const App: React.FC = () => {
 	const [visibleVideo, setVisibleVideo] = useState(false);
 	const [dramaId, setDramaId] = useState('')
     const [record, setRecord] = useState<any>({})
+    const {loading:cacheLoading , run } = useRequest(() => http.post('/series/refreshCache'),{
+        manual: true,
+        onSuccess(res) {
+            if(res.data.code === 0){
+                message.success('操作成功!')
+            }
+           
+        },
+        onError(error: Error){
+            console.log(error)
+        }
+    })
 	const pageSize = 10;
 
 	const loadMoreData = async () => {
@@ -115,6 +129,29 @@ const App: React.FC = () => {
 		})
 	}
 
+    const handleChange = (dramaId, hide) => {
+
+        Modal.confirm({
+            title: '确认切换吗？',
+            content: '切换后将影响该项的显示状态',
+            onOk() {
+                http.post('/series/editDramaHide',{ dramaId, hide: hide ? 0 : 1 }).then(res => {
+                    if(res.data.code === 0 ){
+                        message.success('操作成功')
+                        resetList()
+                    } 
+                }).catch(error => {
+        
+                })
+            }
+        
+        });
+    }
+
+    const onPublish = () => {
+        run()
+    }
+
 	return (
 		<Fragment>
 			{
@@ -138,9 +175,11 @@ const App: React.FC = () => {
 			}
 		
 			<Card
-			
+            extra={
+                <Button loading={cacheLoading} disabled={cacheLoading} onClick={() => onPublish()} type="primary">发布</Button>
+            }
 			title={
-				<Button onClick={() => {  setDramaId(''); setVisible(true);}} style={{ display: "inline-block", margin: "15px 0" }} type="primary" size="large">新增</Button>
+				<Button  icon={<PlusOutlined />}  onClick={() => {  setDramaId(''); setVisible(true);}} style={{ display: "inline-block", margin: "15px 0" }} type="primary" >新增</Button>
 			} style={{ marginBottom: 10 }}>
 				<Form layout="horizontal" onFinish={handleSubmit}>
 					<Row gutter={16}>
@@ -231,6 +270,9 @@ const App: React.FC = () => {
 														>
 															<Button  onClick={(event) =>{ event.stopPropagation() }}size="small" type="primary" danger>删除</Button>
 														</Popconfirm>
+                                                        
+                                                        <span onClick={ (event) => event.stopPropagation()}> <Switch value={ !!item.hide } onChange={() => handleChange(item.id, item.hide)} /></span>
+                                                       
 														
 													</Space>
 												</p>
