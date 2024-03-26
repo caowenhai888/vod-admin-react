@@ -9,7 +9,7 @@ import { useImmer } from 'use-immer'
 import { isEmpty } from 'lodash'
 import DramaForm from './add'
 import VideoList from './videoList'
-import Item from 'antd/es/list/Item';
+
 const { Option } = Select;
 interface DataType {
 	id: string;

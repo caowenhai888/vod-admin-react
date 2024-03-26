@@ -124,7 +124,7 @@ const TagsTable = () => {
             />
        
             <Modal
-                title={selectedTag ? '编辑菜单' : '新增菜单'}
+                title={selectedTag ? '编辑角色' : '新增角色'}
                 open={modalVisible}
                 
                 onOk={handleModalSubmit}

@@ -14,7 +14,6 @@ const Player:React.FC<any> = (props) => {
     useAsyncEffect( async ()=> {
         if(!record.video_id) return 
         setModalOpen(true)
-        console.log(record, 'record===')
         http.post('/series/getVideoPlayAuth',{videoId:record.video_id}).then(res => {
             if(res.data.code === 0) {
                 setModalOpen(true)

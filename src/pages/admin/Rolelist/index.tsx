@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { Space,Table, Button, Modal, Form, Input, message,Card,TreeSelect,Switch,Checkbox,Popconfirm } from 'antd';
 import { PlusOutlined,EditOutlined } from '@ant-design/icons';
-import { ProTable } from '@ant-design/pro-components';
 import { useAntdTable, useAsyncEffect } from 'ahooks'
 import getChildNodeIds from './getChildNodeIds';
-
 import dayjs from 'dayjs'
-
-import { http } from 'src/service';
+import { http, fetch } from 'src/service';
+import { isEmpty } from 'lodash';
 const { SHOW_PARENT } = TreeSelect;
 function transformData(data) {
     return data.map(item => ({
@@ -35,7 +33,7 @@ const TagsTable = () => {
     const { tableProps, refresh } = useAntdTable(getTableData )
 
     useAsyncEffect(async () => {
-        form.setFieldValue('rolepaths',[91, 88, 89])
+    //    form.setFieldValue('rolepaths',[91, 88, 89])
        http.post('/sys/roleMenuData?rid=1').then(res => {
         if(res.data.code === 0) {
             console.log(JSON.stringify(transformData(res.data.data)), 'xxx')
@@ -105,23 +103,38 @@ const TagsTable = () => {
       
     const handleModalSubmit = async() => {
         try {
-            
-        
-        const values = await form.validateFields()
-        let lookup = getChildNodeIds(treeData, 87);
+            const values = await form.validateFields()
+            let lookup = getChildNodeIds(treeData, 87);
+            const {roleid, rolename, descr, rolepaths } = values
+            let data = new FormData();
 
-       return console.log(lookup, 'values====')
-        const url = selectedTag ? '/sys/updateMenu' : '/sys/addMenu';
-            
-        const res = await http.post(url, {...values, mid:  selectedTag?.id, leaf:values.is_leaf === true ? 1 : undefined, is_leaf:undefined }) ;
-        if(res.data.code === 0 ) {
-            form.resetFields();
-            setModalVisible(false);
-            setSelectedTag(null);
-            refresh();
-            message.success('操作成功');
-        }
-        
+            data.append("addApp[1]", "1");
+            data.append('roleid',roleid);
+            data.append('rolename',rolename);
+            data.append('descr',descr);
+            rolepaths.map(item => {
+                let lookup = getChildNodeIds(treeData, item);
+                if(!isEmpty(lookup)){
+                    lookup.map(key => {
+                        data.append('menus',key)
+                    })
+                }
+            })
+
+            fetch({
+                method: 'post',
+                url:"/sys/updateRole",
+                data,
+                headers: {'Content-Type': 'multipart/form-data' }
+            }).then(res => {
+                if(res.data.code === 0 ) {
+                    form.resetFields();
+                    setModalVisible(false);
+                    setSelectedTag(null);
+                    refresh();
+                    message.success('操作成功');
+                }
+            })
         } catch (error) {
             console.log(error, 'error-')
         }
