@@ -22,7 +22,7 @@ const getTableData = (props) => {
     return http.get('/series/videoList', {
         params: {
             page: current,
-            size: pageSize,
+            size: 1000,
             dramaId
         }
     }).then(res =>  {
