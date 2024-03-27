@@ -48,8 +48,7 @@ To learn React, check out the [React documentation](https://reactjs.org/).
 
 ## ngixn proxy
 
-`
-    server {
+`server {
         listen 7000;
 
         server_name  somename  alias  another.alias;
@@ -65,5 +64,4 @@ To learn React, check out the [React documentation](https://reactjs.org/).
           rewrite ^/api/(.*) /$1 break;
           proxy_pass  http://10.95.129.115:81;
        }
-    }
-`
+    }`
