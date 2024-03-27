@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { Space,Table, Button, Modal, Form, Input, message,Card,TreeSelect,Switch,Checkbox,Popconfirm } from 'antd';
 import { PlusOutlined,EditOutlined } from '@ant-design/icons';
 import { useAntdTable, useAsyncEffect } from 'ahooks'
-import getChildNodeIds from './getChildNodeIds';
+import getChildNodeIds,{getTreeSelectCheckedValues} from './getChildNodeIds';
 import dayjs from 'dayjs'
 import { http, fetch } from 'src/service';
 import { isEmpty } from 'lodash';
@@ -33,18 +33,34 @@ const TagsTable = () => {
     const { tableProps, refresh } = useAntdTable(getTableData )
 
     useAsyncEffect(async () => {
-    //    form.setFieldValue('rolepaths',[91, 88, 89])
        http.post('/sys/roleMenuData?rid=1').then(res => {
         if(res.data.code === 0) {
-            console.log(JSON.stringify(transformData(res.data.data)), 'xxx')
             setTreeData(transformData(res.data.data))
         }
        })
     }, [])
+
+    useEffect(() => {
+     
+        if(!isEmpty(selectedTag)) {
+            http.post('/sys/roleMenuData',{rid:selectedTag.id}).then(res => {
+                if(res.data.code === 0) {
+                    const { role_name, remark, admin } = selectedTag
+                    const payload ={
+                        rolename:role_name,
+                        descr: remark,
+                        admin,
+                        rolepaths: getTreeSelectCheckedValues(res.data.data)
+                    }
+                    form.setFieldsValue(payload)
+                }
+            })
+        }
+    }, [selectedTag, form])
     const handleEditButton = (record) => {
         setSelectedTag(record);
         setModalVisible(true);
-        form.setFieldsValue(record);
+        // form.setFieldsValue(record);
     };
     // defaultValue 设置默认值
     const columns:any[] = [
@@ -65,16 +81,17 @@ const TagsTable = () => {
             with: 150,
             render: (_, record) => (
                 <Space>
-                    <Button size="small" type="primary" icon={<EditOutlined />} onClick={() => handleEditButton(record)}>编辑</Button>
+                    <Button disabled={record.id === 1} size="small" type="primary" icon={<EditOutlined />} onClick={() => handleEditButton(record)}>编辑</Button>
                     <Popconfirm
                         title="确认删除"
-                        description="确定删除该菜单吗？"
+                        description="确定删除该角色吗？"
                         onConfirm={() => handleDeleteButton(record)}
                         
                         okText="Yes"
                         cancelText="No"
                     >
                         <Button 
+                                disabled={record.id === 1} 
                                 danger
                                 size="small" 
                                 type="primary"
@@ -91,7 +108,7 @@ const TagsTable = () => {
     
     
     const handleDeleteButton = async (record) => {
-        let response = await http.post('/sys/deleteMenu', { ids: record.id });
+        let response = await http.post('/sys/deleteRole', { ids: record.id });
       
         if (response.data.code === 0) {
             message.info('删除成功');
@@ -104,15 +121,19 @@ const TagsTable = () => {
     const handleModalSubmit = async() => {
         try {
             const values = await form.validateFields()
-            let lookup = getChildNodeIds(treeData, 87);
-            const {roleid, rolename, descr, rolepaths } = values
-            let data = new FormData();
-
+            const { rolename, descr, rolepaths, admin } = values
+          
+            const isEdit = !isEmpty(selectedTag)
+            let data:any = new FormData();
+            if(isEdit){
+                data.append('roleid',selectedTag.id);
+            }
             data.append("addApp[1]", "1");
-            data.append('roleid',roleid);
             data.append('rolename',rolename);
             data.append('descr',descr);
+            data.append('admin',admin ? '1' : '0');
             rolepaths.map(item => {
+                data.append('menus',item)
                 let lookup = getChildNodeIds(treeData, item);
                 if(!isEmpty(lookup)){
                     lookup.map(key => {
@@ -120,13 +141,8 @@ const TagsTable = () => {
                     })
                 }
             })
-
-            fetch({
-                method: 'post',
-                url:"/sys/updateRole",
-                data,
-                headers: {'Content-Type': 'multipart/form-data' }
-            }).then(res => {
+            const url = isEdit ? '/sys/updateRole' :"/sys/addRole"
+            http.post(url,data).then(res => {
                 if(res.data.code === 0 ) {
                     form.resetFields();
                     setModalVisible(false);
@@ -139,6 +155,12 @@ const TagsTable = () => {
             console.log(error, 'error-')
         }
     };
+    const onCancel = () =>{
+        form.resetFields();
+        setModalVisible(false);
+        setSelectedTag(null);
+        refresh();
+}
   
     const tProps = {
         treeData,
@@ -158,7 +180,7 @@ const TagsTable = () => {
                 icon={<PlusOutlined />} 
                 onClick={() => setModalVisible(true)}
             >
-                新增菜单
+                新增角色
             </Button>
         }>
             <Table
@@ -170,28 +192,27 @@ const TagsTable = () => {
             />
        
             <Modal
-                title={selectedTag ? '编辑菜单' : '新增菜单'}
+                title={selectedTag ? '编辑角色' : '新增角色'}
                 open={modalVisible}
                 
                 onOk={handleModalSubmit}
-                onCancel={() => setModalVisible(false)}
+                onCancel={() => onCancel()}
             >
                 <div className='form-box'>
                     <Form 
+                        labelCol={{span:4}}
                         form={form}
-                        layout="horizontal"
-                        initialValues={{ tag_color: '#cb4545' }}
-                    >
+                        layout="horizontal">
                              <Form.Item name="rolename" label="角色名" rules={[{ required: true, message: '请输入角色名' }]}>
                                 <Input placeholder="请输入角色名" />
                             </Form.Item>
 
-                            <Form.Item name="rolepaths" label="权限范围">
+                            <Form.Item name="rolepaths" label="权限范围" rules={[{ required: true}]}>
                                 <TreeSelect {...tProps} />
                             </Form.Item>
 
                             <Form.Item name="admin" label="管理权限" valuePropName="checked">
-                                <Checkbox />
+                                <Checkbox onClick={(Event)=> Event.stopPropagation()} />
                             </Form.Item>
 
                             <Form.Item name="descr" label="具体描述">
