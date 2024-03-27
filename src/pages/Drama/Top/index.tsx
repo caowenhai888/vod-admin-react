@@ -72,6 +72,10 @@ const TagsTable = () => {
             dataIndex: 'rankName',
         },
         {
+            title: '布局',
+            dataIndex: 'layout',
+        },
+        {
             title: '剧集列表',
             dataIndex: 'dramas',
             with:400,
@@ -261,6 +265,17 @@ const TagsTable = () => {
                     </Form.Item>
                     <Form.Item hidden name="rankId" >
                         <Input  />
+                    </Form.Item>
+
+                    <Form.Item label="布局" name="layout" rules={[{ required: true }]} >
+                       <Select>
+                            <Select.Option value={1} >
+                                1
+                            </Select.Option>
+                            <Select.Option value={2} >
+                                2
+                            </Select.Option>
+                       </Select>
                     </Form.Item>
 
                     <Form.List name="drama" >

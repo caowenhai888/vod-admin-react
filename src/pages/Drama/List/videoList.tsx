@@ -12,6 +12,7 @@ import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import Players from './Player'
 import { isEmpty } from 'lodash';
 
+
 (window as any).OSS = OSS;
 const { Dragger } = Upload;
 
@@ -235,6 +236,20 @@ const UploadCom: Ract.FC<Props> = ({ visible, onCancel, resetList,record }) => {
             console.log(error, 'error')
         }
     }
+    const onBatchDel = () => {
+        http.post('/series/batchDelVideo',{
+            videoIds:selectedRowKeys.join(),
+        }).then(res => {
+            if(res.data.code === 0 ) {
+                message.success('操作成功')
+                setSelectedRowKeys([])
+                form.resetFields()
+                refresh()
+            }
+        }).catch(error => {
+
+        })
+    }
     return (
         <Modal width={"80%"} open={visible} title="添加剧集" onCancel={handleCancel} onOk={handleSubmit}>
 
@@ -257,6 +272,16 @@ const UploadCom: Ract.FC<Props> = ({ visible, onCancel, resetList,record }) => {
                             </Form.Item>
                         </Form>
                         <Button onClick={ () => onBatch()} type="primary">提交</Button>
+                      
+                        <Popconfirm
+                            title="确认删除"
+                            description="确认删除么？"
+                            onConfirm={() => onBatchDel()}
+                            okText="Yes"
+                            cancelText="No"
+                        >
+                             <Button danger >删除</Button>
+                        </Popconfirm>
                     </Space>
                 </div>
             }

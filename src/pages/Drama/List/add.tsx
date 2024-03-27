@@ -116,6 +116,15 @@ const DramaForm:React.FC<Props> = ({ visible, onCancel, dramaId, resetList }) =>
             options={tags}
           />
         </Form.Item>
+
+        <Form.Item name="like_count" label="点赞数">
+          <InputNumber width={"100%"} />
+        </Form.Item>
+
+        <Form.Item name="collect_count" label="收藏数">
+          <InputNumber width={"100%"} />
+        </Form.Item>
+
         <Form.Item name="desc" label="剧集描叙" rules={[{ required: true, message: '请输入剧集描述!' }]}>
           <TextArea />
         </Form.Item>

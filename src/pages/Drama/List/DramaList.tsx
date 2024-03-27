@@ -251,8 +251,10 @@ const App: React.FC = () => {
 											<div className='list-content'>
 												<h2 title={item.name}>{item.name}</h2>
 												<p>总集数: {item.all_count}</p>
+                                                <p>点赞数: {item.like_count}</p>
+                                                <p>收藏数: {item.collect_count  }</p>
 												<p>创建时间: {dayjs(item.create_time).format('YYYY-MM-DD')}</p>
-												<p style={{ height: 50 }}>
+												<p style={{ height: 40, marginTop:10, }}>
 													{item?.tags && item?.tags.map(item => (
 														<Tag key={item.tag_id} color={item.tag_color}>{item.tag_name}</Tag>
 													))}

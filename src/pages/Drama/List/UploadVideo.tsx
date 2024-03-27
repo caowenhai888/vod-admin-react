@@ -4,6 +4,8 @@ import { InboxOutlined } from '@ant-design/icons';
 import { http } from 'src/service'
 import type { UploadProps } from 'antd';
 import { useDebounceEffect } from 'ahooks'
+import { isEmpty } from "lodash";
+import { error } from "console";
 
 interface Props {
     options: any
@@ -27,6 +29,8 @@ const MyUploadComponent: React.FC<Props> = ({ options, refresh }) => {
                         AliyunUpload.current.setUploadAuthAndAddress(uploadInfo, res.data.uploadAuth, res.data.uploadAddress, res.data.videoId);
                         setFileList(prevFileList => prevFileList.map(prevFile => prevFile.uid === uploadInfo.file.uid ? { ...prevFile, status: 'uploading' } : prevFile));
                     }
+                }).catch(error => {
+                    message.error('获取凭证失败！')
                 })
             },
             onUploadSucceed(uploadInfo) {
@@ -68,6 +72,8 @@ const MyUploadComponent: React.FC<Props> = ({ options, refresh }) => {
         http.post('/series/voideoUploadSuccess', { ...option }).then(res => {
             if (res.data.code === 0) {
             }
+        }).catch(error => {
+            message.error('上报失败')
         })
     }, [fileList])
     let timer: any = null
@@ -79,9 +85,17 @@ const MyUploadComponent: React.FC<Props> = ({ options, refresh }) => {
             message.error('您只能上传视频文件!');
             return false
         }
-        setFileList(prevFileList => [...prevFileList, { uid:file.uid, name: file.name, percent: 0 }]);
-        AliyunUpload.current.addFile(file, null, null, null, '{"Vod":{}}');
+        setFileList(prevFileList => [...prevFileList, { uid:file.uid,file,  name: file.name, percent: 0 }]);
         return false
+    }
+
+    const onChangeList:any = (info) => {
+        console.log(info, fileList,'info.fileList')
+        if(info.file.status === "removed"){
+            const cList = info.fileList.map(item => item.uid)
+            const l = fileList.filter(item => cList.includes(item.uid))
+            setFileList( l )
+        }
     }
   
     const props: UploadProps = {
@@ -90,12 +104,19 @@ const MyUploadComponent: React.FC<Props> = ({ options, refresh }) => {
         name: 'file',
         multiple: true,
         action: '/upload/demo',
-        beforeUpload: handleBeforeUpload
+        beforeUpload: handleBeforeUpload,
+        onChange: onChangeList
     }
     const startUp = (e) => {
-         e.stopPropagation()
-         AliyunUpload.current.startUpload()
+      
+        if(isEmpty(fileList)) return message.error('请上传文件~')
+        e.stopPropagation()
+        fileList.map(item => {
+            AliyunUpload.current.addFile(item.file, null, null, null, '{"Vod":{}}');
+        })   
+        AliyunUpload.current.startUpload()
     }
+
     return (
         <Fragment>
            <Upload.Dragger  {...props}>

@@ -67,12 +67,12 @@ header {
     object-fit: cover;
     max-width: none;
     display: inline-block;
-    height: 174px;
+    height: 200px;
 }
 .list-content p{
-   padding-top: 10px;
+   padding-top: 4px;
    color: #999;
-    font-size: 14px;
+    font-size: 13px;
 }
 .list-content h2 {
     width: 100%;
