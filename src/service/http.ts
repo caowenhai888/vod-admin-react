@@ -33,7 +33,7 @@ const instance = axios.create({
 instance.interceptors.request.use(
   function (config) {
     if(config.method === 'post') {
-        config.data = qs.stringify(config.data);
+        config.data = new URLSearchParams(config.data).toString();
         config.headers['Content-Type'] = 'application/x-www-form-urlencoded';
     }
 

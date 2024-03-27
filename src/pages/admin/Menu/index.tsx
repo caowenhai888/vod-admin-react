@@ -26,8 +26,8 @@ const TagsTable = () => {
     // defaultValue 设置默认值
     const columns = [
         { title: 'ID', dataIndex: 'id', width: 60 },
-        { title: '菜单标识', dataIndex: 'menu_name'},
-        { title: '菜单显示名', dataIndex: 'menu_text'},
+        { title: '菜单标识', dataIndex: 'menu_name',width: 110},
+        { title: '菜单显示名', dataIndex: 'menu_text', with:120},
         { title: '父节点ID', dataIndex: 'parent_id', width: 110 },
         { 
             title: '叶子节点',

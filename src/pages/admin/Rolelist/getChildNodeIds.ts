@@ -36,6 +36,30 @@ const getChildNodeIds = (data, id) => {
   
   return []; // 如果没有找到节点，返回空数组
 }
+function getTreeSelectCheckedValues(data) {
+    // 定义一个递归函数获取节点的id
+    function getCheckedIds(node) {
+      let ids:any = [];
+      if (node.checked) {
+        ids.push(node.id);
+      }
+      if (node.children) {
+        for (let child of node.children) {
+          ids = ids.concat(getCheckedIds(child));
+        }
+      }
+      return ids;
+    }
+  
+    let checkedIds = [];
+    for (let node of data) {
+      checkedIds = checkedIds.concat(getCheckedIds(node));
+    }
 
+    return checkedIds;
+}
+export {
+    getTreeSelectCheckedValues
+}
 // 模块导出
 export default getChildNodeIds;

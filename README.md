@@ -44,3 +44,26 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
+
+
+## ngixn proxy
+
+`
+    server {
+        listen 7000;
+
+        server_name  somename  alias  another.alias;
+        location / {
+           proxy_pass http://localhost:3000;    #你的本地项目端口
+           proxy_http_version 1.1;
+           proxy_set_header Upgrade $http_upgrade;
+           proxy_set_header Connection 'upgrade';
+           proxy_set_header Host $host;
+           proxy_cache_bypass $http_upgrade;
+        }
+        location /api/ {
+          rewrite ^/api/(.*) /$1 break;
+          proxy_pass  http://10.95.129.115:81;
+       }
+    }
+`

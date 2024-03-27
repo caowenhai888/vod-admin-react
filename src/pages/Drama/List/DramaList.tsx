@@ -263,7 +263,9 @@ const App: React.FC = () => {
 												<p>
 													<Space>
 														<Button onClick={(event) =>{ event.stopPropagation(); editFn(item.id);}} size="small" type="primary">编辑</Button>
-														<Popconfirm
+                                                        <span onClick={(event) =>{ event.stopPropagation() }}>
+                                                        <Popconfirm
+                                                       
 															title="确认删除"
 															description="确认删除剧集么？"
 															onConfirm={() => deleteFn(item.id)}
@@ -272,6 +274,8 @@ const App: React.FC = () => {
 														>
 															<Button  onClick={(event) =>{ event.stopPropagation() }}size="small" type="primary" danger>删除</Button>
 														</Popconfirm>
+                                                        </span>
+													
                                                         
                                                         <span onClick={ (event) => event.stopPropagation()}> <Switch value={ !item.hide } onChange={() => handleChange(item.id, item.hide)} /></span>
                                                        
