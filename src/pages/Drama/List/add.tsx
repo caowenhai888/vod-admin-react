@@ -100,7 +100,7 @@ const DramaForm:React.FC<Props> = ({ visible, onCancel, dramaId, resetList }) =>
                 </Col>
                 <Col span={12}>
                     <Form.Item>
-                        <UploadImg options={record} form={form} />
+                        <UploadImg form={form} />
                     </Form.Item>
                 </Col>
             </Row>

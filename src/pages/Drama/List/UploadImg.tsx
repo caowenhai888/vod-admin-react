@@ -5,11 +5,10 @@ import { http } from 'src/service'
 import type { UploadProps, FormInstance } from 'antd';
 
 interface Props {
-    options: any
     form: FormInstance
 }
 
-const MyUploadComponent: React.FC<Props> = ({ options, form }) => {
+const MyUploadComponent: React.FC<Props> = ({ form }) => {
 
     const [fileList, setFileList] = useState<any>([]);
  
@@ -29,12 +28,7 @@ const MyUploadComponent: React.FC<Props> = ({ options, form }) => {
                 })
             },
             onUploadSucceed(uploadInfo) {
-                var option = {
-                    dramaId: options.id,
-                    videoId: uploadInfo.videoId,
-                    size: uploadInfo.file.size,
-                    fileName: uploadInfo.file.name
-                }
+           
                 setFileList(prevFileList => {
                     const updatedFileList = prevFileList.map(prevFile => prevFile.uid === file.uid ? { ...prevFile, status: 'done' } : prevFile);
                     const areAllFilesUploaded = updatedFileList.every(file => file.status === 'done');
@@ -69,10 +63,7 @@ const MyUploadComponent: React.FC<Props> = ({ options, form }) => {
 
     const handleBeforeUpload = (file: any, fileList: File[]): boolean => {
         const isVideo = file.type.startsWith('video/');
-        // if (!isVideo) {
-        //     message.error('您只能上传视频文件!');
-        //     return false
-        // }
+ 
         setFileList(prevFileList => [...prevFileList, { uid: file.uid, name: file.name, status: 'uploading', percent: 0 }]);
         let newKey = new Date().getTime();
         upFn(file.name, file, newKey);

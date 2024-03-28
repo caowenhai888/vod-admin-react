@@ -34,11 +34,11 @@ const TagsTable = () => {
             dataIndex: 'is_leaf', 
             render: is_leaf => <Switch checked={is_leaf} disabled />,
             width: 100 
-        },
+        },  
         { 
             width: 150,
-            title: '图标样式',
-            dataIndex: 'icon_cls', 
+            title: '菜单路径',
+            dataIndex: 'menu_path', 
         },
         { title: '排序值', dataIndex: 'sort_order', width: 100 },
         { title: '备注', dataIndex: 'remark'},
@@ -124,11 +124,15 @@ const TagsTable = () => {
             />
        
             <Modal
-                title={selectedTag ? '编辑角色' : '新增角色'}
+                title={selectedTag ? '编辑' : '新增'}
                 open={modalVisible}
                 
                 onOk={handleModalSubmit}
-                onCancel={() => setModalVisible(false)}
+                onCancel={() => {
+                    setModalVisible(false)
+                    setSelectedTag(null)
+                    form.resetFields()
+                }}
             >
                 <div className='form-box'>
                     <Form 

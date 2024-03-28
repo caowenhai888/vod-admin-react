@@ -4,18 +4,10 @@ import { Space,Table, Button, Modal, Form, Input,InputNumber, message,Card,Selec
 import { PlusOutlined, MinusCircleOutlined, EyeOutlined } from '@ant-design/icons';
 import { useAntdTable,useRequest } from 'ahooks'
 import { http } from 'src/service';
-import { baseUrl } from 'src/service/http';
+import { fetch } from 'src/service';
 
 import { DragSortTable } from '@ant-design/pro-components';
 
-const instance = axios.create({
-    baseURL: baseUrl,
-    timeout: 10000,
-    headers: {
-      Accept: 'application/json;charset=utf-8',
-      'Content-Type': 'application/json;charset=utf-8',
-    }
-});
 import { isEmpty,find } from 'lodash';
 const { Option } =Select
 
@@ -167,7 +159,7 @@ const TagsTable = () => {
         }
         const url = '/rank/updateRankList';
             
-        const res = await instance.post(url, {
+        const res = await fetch.post(url, {
             ...values, 
             drama:values?.drama?.map(item=>({
                     ...item, 

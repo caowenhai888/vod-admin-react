@@ -12,6 +12,8 @@ import Tag from 'src/pages/Drama/Tag'
 import Login from 'src/pages/Login'
 import Menu from 'src/pages/admin/Menu'
 import Rolelist from 'src/pages/admin/Rolelist'
+import User from 'src/pages/admin/User'
+import Banner from 'src/pages/Drama/Banner'
 // import Home from 'src/pages/Home'
 
 const routerConfig:RouteObject[] = [
@@ -49,6 +51,14 @@ const routerConfig:RouteObject[] = [
             {
                 path:"/sys/showRolelist",
                 element: <Rolelist />
+            },
+            {
+                path:"/sys/showUserlist",
+                element: <User />
+            },
+            {
+                path:"/series/banner",
+                element: <Banner />
             }
 
             

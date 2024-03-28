@@ -33,10 +33,14 @@ const instance = axios.create({
 instance.interceptors.request.use(
   function (config) {
     if(config.method === 'post') {
-        config.data = new URLSearchParams(config.data).toString();
+        const res = config.data
+        if(Object.prototype.toString.call(res)=== '[object FormData]'){
+            config.data = new URLSearchParams(res).toString()
+        } else {
+            config.data = qs.stringify(res);
+        }
         config.headers['Content-Type'] = 'application/x-www-form-urlencoded';
     }
-
 
     // 在发送请求之前做些什么
     const token = localStorage.getItem('token');

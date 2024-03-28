@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { useRequest, useAsyncEffect } from 'ahooks'
 
 import { http } from 'src/service'
+import { isEmpty } from 'lodash';
 const { SubMenu } = Menu;
 
 function api () {
@@ -34,13 +35,13 @@ const ServerMenu = ({}) => {
         defaultOpenKeys={['sub1']}
         style={{ height: '100%', borderRight: 0 }}
         >
-        {menuData.map((item, i) => (
+        {  menuData.map((item, i) => (
             <SubMenu 
             key={`sub${i+1}`}
             icon={item.iconCls === 'layui-icon-print' ? <UserOutlined /> : <LaptopOutlined />}
             title={item.text}
             >
-            {item.leafList.map((leaf, j) => (
+            {  !isEmpty(item.leafList) && item.leafList.filter(item => !['sys/showApplist'].includes(item['menuPath'])).map((leaf, j) => (
                 <Menu.Item
                 key={`${i}-${j}`}
                 onClick={() => Navigate(leaf.menuPath)}
