@@ -88,6 +88,9 @@ const TagsTable = () => {
                                 <ProFormGroup key="group">
                                     <ProFormItem name="dramaId" >
                                         <Select 
+                                            optionFilterProp="children"
+                                            allowClear
+                                            showSearch
                                             style={{width:200,}} 
                                             placeholder="选择剧集" >
                                             {data.map(item =>{

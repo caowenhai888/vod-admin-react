@@ -97,6 +97,8 @@ const UploadCom: Ract.FC<Props> = ({ visible, onCancel, resetList,record }) => {
         { title: '名称',   dataIndex: 'name', width: 220,  ellipsis: true},
         { title: '价格', valueType:"money", dataIndex: 'price', width: 120, },
         { title: '大小', dataIndex: 'size', valueType:"text",width: 120 },
+        { title: '点赞数', dataIndex: 'like_count', valueType:"text",width: 120 },
+
         {
             title: '是否免费',
             dataIndex: 'free',
@@ -312,6 +314,7 @@ const UploadCom: Ract.FC<Props> = ({ visible, onCancel, resetList,record }) => {
                       obj.size = data.size;
                       obj.fileName = data.name;
                       obj.price= data.price
+                      obj.like_count = data.like_count
                       
                       http.post('/series/editVideo', {...obj}).then(res => {
                         if(res.data.code === 0) {

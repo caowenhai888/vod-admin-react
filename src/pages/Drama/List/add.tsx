@@ -117,9 +117,16 @@ const DramaForm:React.FC<Props> = ({ visible, onCancel, dramaId, resetList }) =>
           />
         </Form.Item>
 
-        <Form.Item name="like_count" label="点赞数">
+        <Form.Item name="play_count" label="播放量">
           <InputNumber width={"100%"} />
         </Form.Item>
+
+        <Form.Item name="common_order" label="默认排序">
+          <InputNumber width={"100%"} />
+        </Form.Item>
+        <Form.Item name="discover_order" label="排序">
+          <InputNumber width={"100%"} />
+        </Form.Item>     
 
         <Form.Item name="collect_count" label="收藏数">
           <InputNumber width={"100%"} />

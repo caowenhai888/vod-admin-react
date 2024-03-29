@@ -283,6 +283,9 @@ const TagsTable = () => {
                                                 name={[field.name, 'dramaId']} 
                                             >
                                                 <Select 
+                                                      optionFilterProp="children"
+                                                      allowClear
+                                                      showSearch
                                                       onChange={(selectedId) => {
                                                         updateSelectedDramas(selectedId, 'add');
                                                       }}

@@ -250,8 +250,22 @@ const App: React.FC = () => {
 										<Col span={16}>
 											<div className='list-content'>
 												<h2 title={item.name}>{item.name}</h2>
-												<p>总集数: {item.all_count}</p>
-                                                <p>点赞数: {item.like_count}</p>
+                                               <Row>
+                                                <Col span={12}>
+                                                    <p>总集数: {item.all_count}</p>
+                                                </Col>
+                                                 <Col span={12}> <p>播放量: {item.play_count}</p></Col>
+                                               </Row>
+
+                                               <Row>
+                                                <Col span={12}>
+                                                    <p>默认排序: {item.common_order}</p>
+                                                </Col>
+                                                 <Col span={12}> <p>排序: {item.discover_order}</p></Col>
+                                               </Row>
+
+                                          
+                                               
                                                 <p>收藏数: {item.collect_count  }</p>
 												<p>创建时间: {dayjs(item.create_time).format('YYYY-MM-DD')}</p>
 												<p style={{ height: 40, marginTop:10, }}>
