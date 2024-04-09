@@ -14,6 +14,7 @@ import Menu from 'src/pages/admin/Menu'
 import Rolelist from 'src/pages/admin/Rolelist'
 import User from 'src/pages/admin/User'
 import Banner from 'src/pages/Drama/Banner'
+import VideoClear from 'src/pages/VideoClear'
 // import Home from 'src/pages/Home'
 
 const routerConfig:RouteObject[] = [
@@ -59,6 +60,10 @@ const routerConfig:RouteObject[] = [
             {
                 path:"/series/banner",
                 element: <Banner />
+            },
+            {
+                path:"/series/clear",
+                element: <VideoClear />
             }
 
             

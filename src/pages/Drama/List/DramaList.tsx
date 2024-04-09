@@ -259,9 +259,9 @@ const App: React.FC = () => {
 
                                                <Row>
                                                 <Col span={12}>
-                                                    <p>默认排序: {item.common_order}</p>
+                                                    <p>All Serials: {item.common_order}</p>
                                                 </Col>
-                                                 <Col span={12}> <p>排序: {item.discover_order}</p></Col>
+                                                 <Col span={12}> <p>Discover: {item.discover_order}</p></Col>
                                                </Row>
 
                                           

@@ -24,6 +24,8 @@ const Login = () => {
         })
         if(res.data.code === 0) {
             Navigate('/series/showList')
+        } else {
+            message.error(res.data.msg)
         }
     };
   

@@ -83,7 +83,7 @@ const DramaForm:React.FC<Props> = ({ visible, onCancel, dramaId, resetList }) =>
     <Modal open={visible} title="添加剧集" onCancel={handleCancel} onOk={handleSubmit}>
       <Form  
         style={{ padding:"20px 10px"}}
-        labelCol={{ span: 4 }}
+        labelCol={{ span: 6 }}
         form={form} 
         layout="horizontal" 
         name="form_in_modal">
@@ -91,10 +91,10 @@ const DramaForm:React.FC<Props> = ({ visible, onCancel, dramaId, resetList }) =>
           <Input />
         </Form.Item>
      
-        <Form.Item shouldUpdate={(prevValues, curValues) => prevValues.cover_url !== curValues.cover_url}>
+        <Form.Item label="封面地址" shouldUpdate={(prevValues, curValues) => prevValues.cover_url !== curValues.cover_url}>
             <Row gutter={5}>
                 <Col span={12}>
-                    <Form.Item name="cover_url" shouldUpdate label="封面地址" >
+                    <Form.Item name="cover_url" shouldUpdate  >
                         <Input />
                     </Form.Item>
                 </Col>
@@ -121,10 +121,10 @@ const DramaForm:React.FC<Props> = ({ visible, onCancel, dramaId, resetList }) =>
           <InputNumber width={"100%"} />
         </Form.Item>
 
-        <Form.Item name="common_order" label="默认排序">
+        <Form.Item name="common_order" label="All Serials排序">
           <InputNumber width={"100%"} />
         </Form.Item>
-        <Form.Item name="discover_order" label="排序">
+        <Form.Item name="discover_order" label="Discover排序">
           <InputNumber width={"100%"} />
         </Form.Item>     
 

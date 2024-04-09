@@ -16,7 +16,9 @@ const TagsTable = () => {
     const [selectedTag, setSelectedTag] = useState<any>(null);
     const [modalVisible, setModalVisible] = useState(false);
     const [form] = Form.useForm();
-    const { tableProps, refresh } = useAntdTable(getTableData )
+    const { tableProps, refresh } = useAntdTable(getTableData, {onError() {
+
+    }} )
 
     const handleEditButton = (record) => {
         setSelectedTag(record);
