@@ -3,7 +3,7 @@ import { Button, Card, Drawer,Space,Table } from 'antd'
 import { ProTable } from '@ant-design/pro-components';
 import type { ProColumns } from '@ant-design/pro-components';
 import { useAntdTable, useRequest } from 'ahooks' 
-import { http } from 'src/service'
+import { http, baseUrl } from 'src/service'
 import UploadVideo from './UploadVideo'
 import ClassCom from './Class'
 import type { TableColumnsType, TableProps } from 'antd';
@@ -125,24 +125,29 @@ const VideoClear: React.FC<Props> = (props) => {
     
     const downloadQueue = async (isFont) => {
         for (const item of selectedRowKeys as any) {
-            const href = isFont ? item.extractionUrl : item.erase_url;
-            if (!href) {
+            const localDomain = window.location.origin;
+            const href = isFont ? `${localDomain}${baseUrl}${item.extractionUrl}` : item.erase_url;
+        
+            if (!isFont && !item.erase_url) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                continue;
+            }
+             
+            if (isFont && !item.extractionUrl) {
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 continue;
             }
             setLoading(true)
-            const response = await fetch(href); // Fetch the data
+            const response = await fetch(href);
             setLoading(false)
             if (!response.ok) {
                 console.error('Failed to fetch data:', response.statusText);
                 continue;
             }
     
-            const data = await response.blob(); // Get the binary data
+            const data = await response.blob();
     
-            const fileNameParts = item.name.split('.');
-            const fileExtension = fileNameParts.pop();
-            const newFileName = `${fileNameParts.join('.')}-字幕.${fileExtension}`;
+            const newFileName = `${item.name}-字幕提取.srt`;
     
             const link = document.createElement('a');
             link.href = URL.createObjectURL(data);
@@ -177,7 +182,7 @@ const VideoClear: React.FC<Props> = (props) => {
             <Card title={
                 <Space>
                     <Button loading={loading} onClick={() => downloadFn(false) } type="primary">批量下载视频</Button>
-                    <Button onClick={() => downloadFn(true) } type="primary">批量下载字幕</Button>
+                    <Button loading={loading}  onClick={() => downloadFn(true) } type="primary">批量下载字幕</Button>
                 </Space>
                 
             }>
