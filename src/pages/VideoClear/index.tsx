@@ -124,31 +124,33 @@ const VideoClear: React.FC<Props> = (props) => {
     
     const downloadQueue = async (isFont) => {
         for (const item of selectedRowKeys as any) {
-            const href = isFont ? item.extractionUrl:item.erase_url
-            if(!href) {
-                await new Promise(resolve => setTimeout(resolve, 1000)); 
-                continue
+            const href = isFont ? item.extractionUrl : item.erase_url;
+            if (!href) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                continue;
             }
-
-            const link = document.createElement('a');
-        
-            link.href = href;
-          
-            const blob = new Blob();
+    
+            const response = await fetch(href); // Fetch the data
+            if (!response.ok) {
+                console.error('Failed to fetch data:', response.statusText);
+                continue;
+            }
+    
+            const data = await response.blob(); // Get the binary data
+    
             const fileNameParts = item.name.split('.');
             const fileExtension = fileNameParts.pop();
             const newFileName = `${fileNameParts.join('.')}-字幕.${fileExtension}`;
-
-            link.download = isFont ? newFileName: item.name;
     
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(data);
+            link.download = isFont ? newFileName : item.name;
             link.rel = 'noopener noreferrer';
-        
-            link.href = URL.createObjectURL(blob);
     
             link.click();
-          
+    
             URL.revokeObjectURL(link.href);
-            
+    
             await new Promise(resolve => setTimeout(resolve, 1000)); // 1秒延迟
         }
     };
