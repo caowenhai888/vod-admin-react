@@ -28,6 +28,7 @@ const VideoClear: React.FC<Props> = (props) => {
     const { data:dataArray, refresh:refreshSel} = useRequest(getTableDataSel)
     const [classStatus, setClassStatus] = useState(false)
     const [tagId, setTagId] = useState<any>()
+    const [loading, setLoading] = useState(false)
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
     const { tableProps, refresh } = useAntdTable((parms)=>getTableData({...parms, tagId}), {
         refreshDeps:[tagId]
@@ -129,8 +130,9 @@ const VideoClear: React.FC<Props> = (props) => {
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 continue;
             }
-    
+            setLoading(true)
             const response = await fetch(href); // Fetch the data
+            setLoading(false)
             if (!response.ok) {
                 console.error('Failed to fetch data:', response.statusText);
                 continue;
@@ -174,7 +176,7 @@ const VideoClear: React.FC<Props> = (props) => {
             <div style={{height:15}}></div>
             <Card title={
                 <Space>
-                    <Button onClick={() => downloadFn(false) } type="primary">批量下载视频</Button>
+                    <Button loading={loading} onClick={() => downloadFn(false) } type="primary">批量下载视频</Button>
                     <Button onClick={() => downloadFn(true) } type="primary">批量下载字幕</Button>
                 </Space>
                 
