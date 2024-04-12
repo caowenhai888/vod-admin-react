@@ -2,6 +2,7 @@
   "name": "react-admin",
   "version": "0.1.0",
   "private": true,
+  "proxy":"http://10.95.129.115:81",
   "dependencies": {
     "@ant-design/pro-components": "^2.6.50",
     "@testing-library/jest-dom": "^5.17.0",

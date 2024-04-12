@@ -1,23 +1,38 @@
 import React, { Fragment, useEffect, useState } from 'react';
-import { Card, Table } from 'antd'
+import { Button, Card, Drawer,Space,Table } from 'antd'
 import { ProTable } from '@ant-design/pro-components';
-import type { ActionType, ProColumns } from '@ant-design/pro-components';
-import { useAntdTable } from 'ahooks' 
+import type { ProColumns } from '@ant-design/pro-components';
+import { useAntdTable, useRequest } from 'ahooks' 
 import { http } from 'src/service'
 import UploadVideo from './UploadVideo'
-
+import ClassCom from './Class'
+import type { TableColumnsType, TableProps } from 'antd';
+type TableRowSelection<T> = TableProps<T>['rowSelection'];
 interface Props { }
 
-const getTableData = ({current,pageSize}) => {
-    return http.get(`/videoErase/getEraseList`,{ params:{page:current,size:pageSize}}).then(res => (
+const getTableData = ({current,pageSize,tagId}) => {
+    return http.get(`/videoErase/getEraseList`,{ params:{page:current,size:pageSize,tag_id:tagId}}).then(res => (
         {
             total: res.data.count,
             list: res?.data?.data
         }
     ));
 };
+const getTableDataSel = (): Promise<any> => {
+ 
+    return http.get(`/videoErase/getEraseTagList`)
+      .then((res) =>  res.data.data );
+};
 const VideoClear: React.FC<Props> = (props) => {
-    const { tableProps, refresh } = useAntdTable(getTableData)
+   
+    const { data:dataArray, refresh:refreshSel} = useRequest(getTableDataSel)
+    const [classStatus, setClassStatus] = useState(false)
+    const [tagId, setTagId] = useState<any>()
+    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+    const { tableProps, refresh } = useAntdTable((parms)=>getTableData({...parms, tagId}), {
+        refreshDeps:[tagId]
+    })
+
     const columns: ProColumns[] = [
         {
             title: '视频名字',
@@ -52,10 +67,10 @@ const VideoClear: React.FC<Props> = (props) => {
             key: 'status',
             width:120,
             valueEnum: {
-                0: { text: '全部' },
                 1: { text: '未擦除' },
                 2: { text: '擦除中' },
-                3: { text: '已擦除' },
+                3: { text: '上传到OSS中' },
+                4: { text: '擦除完成' }
             },
         },
         {
@@ -88,20 +103,91 @@ const VideoClear: React.FC<Props> = (props) => {
         },
 
     ];
+
+    const onSelectChange = (newSelectedRowKeys: React.Key[], selectedRows,info) => {
+        setSelectedRowKeys(selectedRows);
+    };
+  
+    const rowSelection: TableRowSelection<any> = {
+      selectedRowKeys:selectedRowKeys.map((item:any) => item.erase_job_id ),
+      getCheckboxProps: (record: any) => ({
+        // disabled: record.status !== 4, // Column configuration not to be checked
+        // name: record.name,
+      }),
+      onChange: onSelectChange,
+      selections: [
+        Table.SELECTION_ALL,
+        Table.SELECTION_INVERT,
+        Table.SELECTION_NONE,
+      ],
+    };
+    
+    const downloadQueue = async (isFont) => {
+        for (const item of selectedRowKeys as any) {
+            const href = isFont ? item.extractionUrl:item.erase_url
+            if(!href) {
+                await new Promise(resolve => setTimeout(resolve, 1000)); 
+                continue
+            }
+
+            const link = document.createElement('a');
+        
+            link.href = href;
+          
+            const blob = new Blob();
+            const fileNameParts = item.name.split('.');
+            const fileExtension = fileNameParts.pop();
+            const newFileName = `${fileNameParts.join('.')}-字幕.${fileExtension}`;
+
+            link.download = isFont ? newFileName: item.name;
+    
+            link.rel = 'noopener noreferrer';
+        
+            link.href = URL.createObjectURL(blob);
+    
+            link.click();
+          
+            URL.revokeObjectURL(link.href);
+            
+            await new Promise(resolve => setTimeout(resolve, 1000)); // 1秒延迟
+        }
+    };
+    
+    const downloadFn = (v) => {
+      
+        downloadQueue(v)
+    }
+
     return (
         <Fragment>
             <Card>
-                <UploadVideo refresh ={ refresh} />
+                <UploadVideo setTagId={setTagId} tagId={tagId} dataArray={dataArray} setClassStatus={setClassStatus} refresh ={ refresh} />
             </Card>
+            <Drawer title="分类管理" width={"80%"} onClose={() => {
+                setClassStatus(false)
+                refreshSel()
+            }} open={classStatus}>
+                <ClassCom />
+            </Drawer>
             <div style={{height:15}}></div>
-            <Card>
+            <Card title={
+                <Space>
+                    <Button onClick={() => downloadFn(false) } type="primary">批量下载视频</Button>
+                    <Button onClick={() => downloadFn(true) } type="primary">批量下载字幕</Button>
+                </Space>
+                
+            }>
                 <ProTable
+                    rowSelection={rowSelection} 
                     bordered
                     scroll={{ x: 1300 }}
                     columns={columns}
                     search={false}
                     toolBarRender={false}
+                    rowKey={'erase_job_id'}
+                      
                     {...tableProps}
+                    pagination={{...tableProps.pagination,showSizeChanger:true}}
                 />
             </Card>
         </Fragment>

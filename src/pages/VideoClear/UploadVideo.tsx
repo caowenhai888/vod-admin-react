@@ -1,23 +1,28 @@
 import React, { Fragment, useCallback, useEffect, useRef, useState } from "react";
-import { Upload, Button, message, Select, Space } from "antd";
+import { Upload, Button, message, Select, Space,Row,Col,Drawer  } from "antd";
 import { InboxOutlined } from '@ant-design/icons';
 import { http } from 'src/service'
 import type { UploadProps } from 'antd';
 import { isEmpty } from "lodash";
 import { useRequest } from 'ahooks'
-
 interface Props {
     refresh: () => void
+    setClassStatus:(v:boolean) => void
+    dataArray:any[]
+    setTagId: (v:boolean) => void
+    tagId: boolean
 }
 
 function getEraseAreas() {
     return http.get('/videoErase/getEraseAreas').then(res => res.data.data)
 }
-const MyUploadComponent: React.FC<Props> = ({ refresh }) => {
-
+const MyUploadComponent: React.FC<Props> = ({ refresh, setClassStatus, dataArray, tagId, setTagId}) => {
+ 
     const [fileList, setFileList] = useState<any>([]);
     const AliyunUpload = useRef<any>(null)
     const [area, setArea] = useState(1)
+  
+
     const { data } = useRequest(getEraseAreas)
     useEffect(() => {
         const payload = {
@@ -41,7 +46,7 @@ const MyUploadComponent: React.FC<Props> = ({ refresh }) => {
                     return updatedFileList
                 });
                 console.log(uploadInfo.videoId, 'uploadInfo.videoId')
-                voideoUploadSuccess(uploadInfo.videoId, uploadInfo.file.name)
+                voideoUploadSuccess(uploadInfo.videoId, uploadInfo.file.name, tagId)
 
             },
             onUploadFailed(uploadInfo, code, mess) {
@@ -64,12 +69,12 @@ const MyUploadComponent: React.FC<Props> = ({ refresh }) => {
         AliyunUpload.current = null
         if (AliyunUpload.current) return
         AliyunUpload.current = new (window as any).AliyunUpload.Vod(payload)
-    }, [area])
+    }, [area, tagId])
 
 
-    const voideoUploadSuccess = (id, name) => {
+    const voideoUploadSuccess = (id, name,tag_id) => {
         console.log(area, 'area')
-        http.post('/videoErase/erase',{id,name, areaId:area}).then(res => {
+        http.post('/videoErase/erase',{id,name, areaId:area, tag_id}).then(res => {
             if (res.data.code === 0) {
             }
         }).catch(error => {
@@ -108,27 +113,58 @@ const MyUploadComponent: React.FC<Props> = ({ refresh }) => {
     const startUp = (e) => {
 
         if (isEmpty(fileList)) return message.error('请上传文件~')
+            console.log(isEmpty(tagId),tagId,'tagId==')
+        if(!tagId) {
+            return message.error('请选择分类')
+        }
         e.stopPropagation()
         fileList.map(item => {
             AliyunUpload.current.addFile(item.file, null, null, null, '{"Vod":{}}');
         })
         AliyunUpload.current.startUpload()
     }
-
+    
     return (
         <Fragment>
-            <Space>
-            {fileList.length !== 0 && <Button danger onClick={(e) => startUp(e)} type="primary">点击开始上传</Button>}
-            <Select style={{width:120}} value={area} onChange={(value) => setArea(value)}>
-                {data?.map(item => {
-                    return (
-                        <Select.Option value={item.id} >
-                        {item.name}
-                        </Select.Option>
-                    )
-                })}
-            </Select>
-            </Space>
+            <Row >
+                <Col flex={1}>
+                <Space>
+                <Select 
+                    placeholder="请选择分类" 
+                    showSearch allowClear 
+                    style={{width:180}} 
+                    value={tagId} 
+                    filterOption={(input, option:any) =>
+                        option?.children?.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                    }
+                    onChange={(value) => setTagId(value)}>
+                    {dataArray?.map(item => {
+                        return (
+                            <Select.Option key={item.id} value={item.id} >
+                            {item.name}
+                            </Select.Option>
+                        )
+                    })}
+                </Select>
+
+                {fileList.length !== 0 && <Button danger onClick={(e) => startUp(e)} type="primary">点击开始上传</Button>}
+                <Select style={{width:160}} value={area} onChange={(value) => setArea(value)}>
+                    {data?.map(item => {
+                        return (
+                            <Select.Option  key={item.id} value={item.id} >
+                            {item.name}
+                            </Select.Option>
+                        )
+                    })}
+                </Select>
+                
+               </Space>
+                </Col>
+                <Col>
+                    <Button type="primary" onClick={() => setClassStatus(true)}>分类管理</Button>
+                </Col>
+            </Row>
+           
             <div style={{ height:15}}></div>
             <Upload.Dragger  {...props}>
                 <p className="ant-upload-drag-icon">
