@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState } from 'react';
-import { Button, Card, Drawer,Space,Table } from 'antd'
+import { Button, Card, Drawer,Space,Table, message } from 'antd'
 import { ProTable } from '@ant-design/pro-components';
 import type { ProColumns } from '@ant-design/pro-components';
 import { useAntdTable, useRequest } from 'ahooks' 
@@ -72,6 +72,17 @@ const VideoClear: React.FC<Props> = (props) => {
                 2: { text: '擦除中' },
                 3: { text: '上传到OSS中' },
                 4: { text: '擦除完成' }
+            },
+        },
+        {
+            title: '转码状态',
+            dataIndex: 'extractionStatus',
+            key: 'extractionStatus',
+            width:120,
+            valueEnum: {
+                0: { text: '未擦除' },
+                1: { text: '擦除中' },
+                2: { text: '擦除完成' }
             },
         },
         {
@@ -167,6 +178,24 @@ const VideoClear: React.FC<Props> = (props) => {
         downloadQueue(v)
     }
 
+    const clearFont = () => {
+        http.get('/videoErase/doErase',{params:{videoIds:selectedRowKeys.map((item:any) => item.videoId ).join()}}).then(res => {
+            if(res.data.code === 0){
+                message.success('操作成功！')
+                refresh()
+            }
+        })
+    }
+
+    const getFont = () => {
+        http.get('/videoErase/doExtrac',{params:{videoIds:selectedRowKeys.map((item:any) => item.videoId ).join()}}).then(res => {
+            if(res.data.code === 0){
+                message.success('操作成功！')
+                refresh()
+            }
+        })
+    }
+
     return (
         <Fragment>
             <Card>
@@ -183,6 +212,8 @@ const VideoClear: React.FC<Props> = (props) => {
                 <Space>
                     <Button loading={loading} onClick={() => downloadFn(false) } type="primary">批量下载视频</Button>
                     <Button loading={loading}  onClick={() => downloadFn(true) } type="primary">批量下载字幕</Button>
+                    <Button loading={loading}  onClick={() => clearFont() } type="primary">擦除字幕</Button>
+                    <Button loading={loading}  onClick={() => getFont() } type="primary">提取字幕</Button>
                 </Space>
                 
             }>

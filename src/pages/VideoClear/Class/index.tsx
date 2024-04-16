@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Space,Table, Button, Modal, Form, Input, message,Card,Popover,Popconfirm } from 'antd';
+import { Space,Table, Button, Modal, Form, Input, message,Card,Popconfirm } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { SketchPicker } from 'react-color';
 import { useAntdTable } from 'ahooks'
+import { debounce} from 'lodash'
 
 import { http } from 'src/service';
-export const getTableData = ({ current, pageSize }): Promise<any> => {
-    const query = `page=${current}&size=${pageSize}`;
+export const getTableData = ({ current, pageSize, name }): Promise<any> => {
+    const query = `page=${current}&size=${pageSize}&name=${name}`;
     return http.get(`/videoErase/getEraseTagList?${query}`)
       .then((res) => ({
         total: res.data.count,
@@ -20,7 +21,11 @@ const TagsTable = () => {
     const [modalVisible, setModalVisible] = useState(false);
     const [loading, setLoading] = useState(false);
     const [form] = Form.useForm();
-    const { tableProps, refresh } = useAntdTable(getTableData )
+    const [name, setName] = useState('')
+
+    const { tableProps, refresh } = useAntdTable((parms)=>getTableData({...parms, name}), {
+        refreshDeps:[name]
+    })
   
     // defaultValue 设置默认值
     const columns = [
@@ -68,6 +73,7 @@ const TagsTable = () => {
             ),
         },
     ]; 
+
     
     const handleEditButton = (record) => {
         setSelectedTag(record);
@@ -107,15 +113,25 @@ const TagsTable = () => {
         }
     };
 
+    const debouncedChangeHandler = debounce((value) => {
+        setName(value);
+      }, 300); // 存为
+
     return (
         <Card bordered={false} title={
-            <Button 
-                type="primary" 
-                icon={<PlusOutlined />} 
-                onClick={() => setModalVisible(true)}
-            >
-                新增分类
-            </Button>
+            <Space>
+                  <Button 
+                    type="primary" 
+                    icon={<PlusOutlined />} 
+                    onClick={() => setModalVisible(true)}
+                >
+                    新增分类
+                </Button>
+                 <Input placeholder='搜索名称' allowClear onChange={(e) => debouncedChangeHandler(e.target.value)} />
+            </Space>
+          
+
+           
         }>
             <Table 
                 bordered 
