@@ -63,26 +63,25 @@ const VideoClear: React.FC<Props> = (props) => {
             
         },
         {
-            title: '状态',
+            title: '字幕状态',
+            dataIndex: 'extractionStatus',
+            key: 'extractionStatus',
+            width:120,
+            valueEnum: {
+                0: { text: '未提取' },
+                1: { text: '提取中' },
+                2: { text: '提取完成' }
+            },
+        },
+        {
+            title: '擦除状态',
             dataIndex: 'status',
             key: 'status',
             width:120,
             valueEnum: {
                 1: { text: '未擦除' },
                 2: { text: '擦除中' },
-                3: { text: '上传到OSS中' },
                 4: { text: '擦除完成' }
-            },
-        },
-        {
-            title: '转码状态',
-            dataIndex: 'extractionStatus',
-            key: 'extractionStatus',
-            width:120,
-            valueEnum: {
-                0: { text: '未擦除' },
-                1: { text: '擦除中' },
-                2: { text: '擦除完成' }
             },
         },
         {
@@ -121,7 +120,7 @@ const VideoClear: React.FC<Props> = (props) => {
     };
   
     const rowSelection: TableRowSelection<any> = {
-      selectedRowKeys:selectedRowKeys.map((item:any) => item.erase_job_id ),
+      selectedRowKeys:selectedRowKeys.map((item:any) => item.videoId ),
       getCheckboxProps: (record: any) => ({
         // disabled: record.status !== 4, // Column configuration not to be checked
         // name: record.name,
@@ -135,17 +134,18 @@ const VideoClear: React.FC<Props> = (props) => {
     };
     
     const downloadQueue = async (isFont) => {
+        console.log(selectedRowKeys,'selectedRowKeys==')
         for (const item of selectedRowKeys as any) {
             const localDomain = window.location.origin;
             const href = isFont ? `${localDomain}${baseUrl}${item.extractionUrl}` : item.erase_url;
         
             if (!isFont && !item.erase_url) {
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                console.error('not erase_url')
                 continue;
             }
              
             if (isFont && !item.extractionUrl) {
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                console.error('not extractionUrl')
                 continue;
             }
             setLoading(true)
@@ -169,7 +169,7 @@ const VideoClear: React.FC<Props> = (props) => {
     
             URL.revokeObjectURL(link.href);
     
-            await new Promise(resolve => setTimeout(resolve, 1000)); // 1秒延迟
+            await new Promise(resolve => setTimeout(resolve, 500)); // 1秒延迟
         }
     };
     
@@ -224,7 +224,7 @@ const VideoClear: React.FC<Props> = (props) => {
                     columns={columns}
                     search={false}
                     toolBarRender={false}
-                    rowKey={'erase_job_id'}
+                    rowKey={'videoId'}
                       
                     {...tableProps}
                     pagination={{...tableProps.pagination,showSizeChanger:true}}

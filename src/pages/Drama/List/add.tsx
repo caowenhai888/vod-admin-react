@@ -117,6 +117,19 @@ const DramaForm:React.FC<Props> = ({ visible, onCancel, dramaId, resetList }) =>
           />
         </Form.Item>
 
+        <Form.Item name="cover_status" label="封面">
+          <Select
+            placeholder="封面"
+            options={[
+              { value:1, label:"不显示封面"},
+              { value:2, label:"剧集封面"},
+              { value:3, label:"智能封面"}
+            ]}
+          >
+           
+          </Select>
+        </Form.Item>
+
         <Form.Item name="play_count" label="播放量">
           <InputNumber width={"100%"} />
         </Form.Item>
