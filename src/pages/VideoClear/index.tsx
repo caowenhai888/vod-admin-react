@@ -20,7 +20,7 @@ const getTableData = ({current,pageSize,tagId}) => {
 };
 const getTableDataSel = (): Promise<any> => {
  
-    return http.get(`/videoErase/getEraseTagList`)
+    return http.get(`/videoErase/getEraseTagList`, {params:{page:1, size:1000}})
       .then((res) =>  res.data.data );
 };
 const VideoClear: React.FC<Props> = (props) => {
