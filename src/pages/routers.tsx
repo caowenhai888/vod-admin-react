@@ -15,6 +15,7 @@ import Rolelist from 'src/pages/admin/Rolelist'
 import User from 'src/pages/admin/User'
 import Banner from 'src/pages/Drama/Banner'
 import VideoClear from 'src/pages/VideoClear'
+import Integral from 'src/pages/Integral'
 // import Home from 'src/pages/Home'
 
 const routerConfig:RouteObject[] = [
@@ -64,8 +65,11 @@ const routerConfig:RouteObject[] = [
             {
                 path:"/series/clear",
                 element: <VideoClear />
-            }
-
+            },
+            {
+                path:"/series/integral",
+                element: <Integral />
+            },
             
         ]
     },
